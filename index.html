@@ -333,10 +333,29 @@ print('Hello World')"></textarea>
             return Math.abs(hash % 256);
         }
         
-        function xorCipher(text, key) {
+        // UTF-8 to binary string conversion
+        function utf8ToBinary(str) {
+            const utf8 = new TextEncoder().encode(str);
+            let binary = '';
+            for (let i = 0; i < utf8.length; i++) {
+                binary += String.fromCharCode(utf8[i]);
+            }
+            return binary;
+        }
+        
+        // Binary string to UTF-8 conversion
+        function binaryToUtf8(binary) {
+            const bytes = new Uint8Array(binary.length);
+            for (let i = 0; i < binary.length; i++) {
+                bytes[i] = binary.charCodeAt(i);
+            }
+            return new TextDecoder().decode(bytes);
+        }
+        
+        function xorCipher(data, key) {
             let result = '';
-            for (let i = 0; i < text.length; i++) {
-                result += String.fromCharCode(text.charCodeAt(i) ^ (key + (i % 256)));
+            for (let i = 0; i < data.length; i++) {
+                result += String.fromCharCode(data.charCodeAt(i) ^ (key + (i % 256)));
             }
             return result;
         }
@@ -359,8 +378,11 @@ print('Hello World')"></textarea>
                 // Generate encryption key
                 const encryptionKey = getEncryptionKey(secretKey);
                 
+                // Convert UTF-8 to binary string
+                const binary = utf8ToBinary(script);
+                
                 // Encrypt using XOR
-                const encrypted = xorCipher(script, encryptionKey);
+                const encrypted = xorCipher(binary, encryptionKey);
                 
                 // Convert to Base64
                 const base64 = btoa(encrypted);
@@ -424,8 +446,11 @@ print('Hello World')"></textarea>
                 // Decrypt using XOR
                 const decrypted = xorCipher(encrypted, encryptionKey);
                 
+                // Convert binary string back to UTF-8
+                const script = binaryToUtf8(decrypted);
+                
                 // Display result
-                document.getElementById('decodedOutput').textContent = decrypted;
+                document.getElementById('decodedOutput').textContent = script;
                 document.getElementById('decodeOutput').style.display = 'block';
                 
                 // Scroll to output
