@@ -273,34 +273,38 @@
         }
 
         function areFramesSimilar(frame1, frame2, tolerance) {
-            // Bandingkan posisi
-            const posDiff = Math.sqrt(
-                Math.pow(frame1.position.x - frame2.position.x, 2) +
-                Math.pow(frame1.position.y - frame2.position.y, 2) +
-                Math.pow(frame1.position.z - frame2.position.z, 2)
-            );
+            // Bandingkan setiap properti numerik dengan tolerance
             
-            if (posDiff > tolerance) return false;
+            // Posisi
+            if (Math.abs(frame1.position.x - frame2.position.x) > tolerance) return false;
+            if (Math.abs(frame1.position.y - frame2.position.y) > tolerance) return false;
+            if (Math.abs(frame1.position.z - frame2.position.z) > tolerance) return false;
             
-            // Bandingkan velocity
-            const velDiff = Math.sqrt(
-                Math.pow(frame1.velocity.x - frame2.velocity.x, 2) +
-                Math.pow(frame1.velocity.y - frame2.velocity.y, 2) +
-                Math.pow(frame1.velocity.z - frame2.velocity.z, 2)
-            );
+            // Velocity
+            if (Math.abs(frame1.velocity.x - frame2.velocity.x) > tolerance) return false;
+            if (Math.abs(frame1.velocity.y - frame2.velocity.y) > tolerance) return false;
+            if (Math.abs(frame1.velocity.z - frame2.velocity.z) > tolerance) return false;
             
-            if (velDiff > tolerance) return false;
-            
-            // Bandingkan rotation
-            const rotDiff = Math.abs(frame1.rotation - frame2.rotation);
+            // Rotation (dengan handling untuk nilai yang wrap around -π ke π)
+            let rotDiff = Math.abs(frame1.rotation - frame2.rotation);
+            if (rotDiff > Math.PI) rotDiff = 2 * Math.PI - rotDiff;
             if (rotDiff > tolerance) return false;
             
-            // Bandingkan hipHeight
-            const heightDiff = Math.abs(frame1.hipHeight - frame2.hipHeight);
-            if (heightDiff > tolerance) return false;
+            // HipHeight
+            if (Math.abs(frame1.hipHeight - frame2.hipHeight) > tolerance) return false;
             
-            // State harus sama
+            // WalkSpeed
+            if (Math.abs(frame1.walkSpeed - frame2.walkSpeed) > tolerance) return false;
+            
+            // Move Direction
+            if (Math.abs(frame1.moveDirection.x - frame2.moveDirection.x) > tolerance) return false;
+            if (Math.abs(frame1.moveDirection.y - frame2.moveDirection.y) > tolerance) return false;
+            if (Math.abs(frame1.moveDirection.z - frame2.moveDirection.z) > tolerance) return false;
+            
+            // Boolean dan string harus sama persis
             if (frame1.state !== frame2.state) return false;
+            if (frame1.tool !== frame2.tool) return false;
+            if (frame1.jumping !== frame2.jumping) return false;
             
             return true;
         }
