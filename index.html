@@ -273,76 +273,54 @@
         }
 
         function areFramesSimilar(frame1, frame2, tolerance) {
-            // Hitung persentase perubahan untuk setiap properti numerik
+            // Bandingkan posisi dengan tolerance (seperti Python script)
+            const pos1 = frame1.position;
+            const pos2 = frame2.position;
             
-            // Fungsi helper untuk menghitung perbedaan relatif
-            const relDiff = (a, b) => {
-                const avg = (Math.abs(a) + Math.abs(b)) / 2;
-                if (avg < 0.001) return 0; // Jika nilai sangat kecil, anggap sama
-                return Math.abs(a - b) / avg;
-            };
+            // Cek setiap komponen posisi
+            if (Math.abs(pos1.x - pos2.x) > tolerance) return false;
+            if (Math.abs(pos1.y - pos2.y) > tolerance) return false;
+            if (Math.abs(pos1.z - pos2.z) > tolerance) return false;
             
-            // Posisi - gunakan perbedaan absolut karena koordinat bisa sangat besar
-            const posXDiff = Math.abs(frame1.position.x - frame2.position.x);
-            const posYDiff = Math.abs(frame1.position.y - frame2.position.y);
-            const posZDiff = Math.abs(frame1.position.z - frame2.position.z);
-            
-            // Jika perubahan posisi terlalu kecil, kemungkinan duplikat
-            if (posXDiff > tolerance || posYDiff > tolerance || posZDiff > tolerance) {
-                return false;
-            }
-            
-            // Velocity - cek perubahan relatif
-            if (relDiff(frame1.velocity.x, frame2.velocity.x) > tolerance) return false;
-            if (relDiff(frame1.velocity.y, frame2.velocity.y) > tolerance) return false;
-            if (relDiff(frame1.velocity.z, frame2.velocity.z) > tolerance) return false;
-            
-            // Rotation dengan handling wrap-around
-            let rotDiff = Math.abs(frame1.rotation - frame2.rotation);
-            if (rotDiff > Math.PI) rotDiff = 2 * Math.PI - rotDiff;
-            if (rotDiff > tolerance) return false;
-            
-            // HipHeight
-            if (relDiff(frame1.hipHeight, frame2.hipHeight) > tolerance) return false;
-            
-            // WalkSpeed
-            if (relDiff(frame1.walkSpeed, frame2.walkSpeed) > tolerance) return false;
-            
-            // Move Direction
-            if (relDiff(frame1.moveDirection.x, frame2.moveDirection.x) > tolerance) return false;
-            if (relDiff(frame1.moveDirection.y, frame2.moveDirection.y) > tolerance) return false;
-            if (relDiff(frame1.moveDirection.z, frame2.moveDirection.z) > tolerance) return false;
-            
-            // Time difference - jika waktu terlalu dekat, kemungkinan duplikat
-            const timeDiff = Math.abs(frame1.time - frame2.time);
-            if (timeDiff < 0.001) return true; // Hampir waktu yang sama = duplikat
-            
-            // Boolean dan string harus sama persis
-            if (frame1.state !== frame2.state) return false;
-            if (frame1.tool !== frame2.tool) return false;
-            if (frame1.jumping !== frame2.jumping) return false;
-            
+            // Jika semua komponen posisi dalam tolerance, dianggap sama
             return true;
         }
 
         function removeDuplicates(frames, tolerance) {
             if (frames.length === 0) return [];
             
-            const uniqueFrames = [frames[0]];
+            const uniqueFrames = [];
+            let prevPos = null;
+            let consecutiveCount = 0;
             
-            for (let i = 1; i < frames.length; i++) {
-                const currentFrame = frames[i];
-                let isDuplicate = false;
+            for (let i = 0; i < frames.length; i++) {
+                const currentPos = frames[i].position;
                 
-                // Bandingkan dengan frame sebelumnya (frame terakhir di uniqueFrames)
-                const lastUniqueFrame = uniqueFrames[uniqueFrames.length - 1];
-                
-                if (areFramesSimilar(currentFrame, lastUniqueFrame, tolerance)) {
-                    isDuplicate = true;
+                if (prevPos === null) {
+                    // Frame pertama selalu disimpan
+                    uniqueFrames.push(frames[i]);
+                    prevPos = currentPos;
+                    consecutiveCount = 1;
+                    continue;
                 }
                 
-                if (!isDuplicate) {
-                    uniqueFrames.push(currentFrame);
+                // Cek apakah posisi sama dengan frame sebelumnya
+                const isSame = areFramesSimilar(frames[i], frames[i-1], tolerance);
+                
+                if (isSame) {
+                    consecutiveCount++;
+                    // Skip frame ini jika sudah ada 2+ frame berurutan yang sama
+                    if (consecutiveCount >= 2) {
+                        continue;
+                    }
+                }
+                
+                // Simpan frame jika berbeda atau masih frame pertama dalam run
+                uniqueFrames.push(frames[i]);
+                
+                if (!isSame) {
+                    prevPos = currentPos;
+                    consecutiveCount = 1;
                 }
             }
             
