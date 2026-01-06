@@ -273,33 +273,49 @@
         }
 
         function areFramesSimilar(frame1, frame2, tolerance) {
-            // Bandingkan setiap properti numerik dengan tolerance
+            // Hitung persentase perubahan untuk setiap properti numerik
             
-            // Posisi
-            if (Math.abs(frame1.position.x - frame2.position.x) > tolerance) return false;
-            if (Math.abs(frame1.position.y - frame2.position.y) > tolerance) return false;
-            if (Math.abs(frame1.position.z - frame2.position.z) > tolerance) return false;
+            // Fungsi helper untuk menghitung perbedaan relatif
+            const relDiff = (a, b) => {
+                const avg = (Math.abs(a) + Math.abs(b)) / 2;
+                if (avg < 0.001) return 0; // Jika nilai sangat kecil, anggap sama
+                return Math.abs(a - b) / avg;
+            };
             
-            // Velocity
-            if (Math.abs(frame1.velocity.x - frame2.velocity.x) > tolerance) return false;
-            if (Math.abs(frame1.velocity.y - frame2.velocity.y) > tolerance) return false;
-            if (Math.abs(frame1.velocity.z - frame2.velocity.z) > tolerance) return false;
+            // Posisi - gunakan perbedaan absolut karena koordinat bisa sangat besar
+            const posXDiff = Math.abs(frame1.position.x - frame2.position.x);
+            const posYDiff = Math.abs(frame1.position.y - frame2.position.y);
+            const posZDiff = Math.abs(frame1.position.z - frame2.position.z);
             
-            // Rotation (dengan handling untuk nilai yang wrap around -π ke π)
+            // Jika perubahan posisi terlalu kecil, kemungkinan duplikat
+            if (posXDiff > tolerance || posYDiff > tolerance || posZDiff > tolerance) {
+                return false;
+            }
+            
+            // Velocity - cek perubahan relatif
+            if (relDiff(frame1.velocity.x, frame2.velocity.x) > tolerance) return false;
+            if (relDiff(frame1.velocity.y, frame2.velocity.y) > tolerance) return false;
+            if (relDiff(frame1.velocity.z, frame2.velocity.z) > tolerance) return false;
+            
+            // Rotation dengan handling wrap-around
             let rotDiff = Math.abs(frame1.rotation - frame2.rotation);
             if (rotDiff > Math.PI) rotDiff = 2 * Math.PI - rotDiff;
             if (rotDiff > tolerance) return false;
             
             // HipHeight
-            if (Math.abs(frame1.hipHeight - frame2.hipHeight) > tolerance) return false;
+            if (relDiff(frame1.hipHeight, frame2.hipHeight) > tolerance) return false;
             
             // WalkSpeed
-            if (Math.abs(frame1.walkSpeed - frame2.walkSpeed) > tolerance) return false;
+            if (relDiff(frame1.walkSpeed, frame2.walkSpeed) > tolerance) return false;
             
             // Move Direction
-            if (Math.abs(frame1.moveDirection.x - frame2.moveDirection.x) > tolerance) return false;
-            if (Math.abs(frame1.moveDirection.y - frame2.moveDirection.y) > tolerance) return false;
-            if (Math.abs(frame1.moveDirection.z - frame2.moveDirection.z) > tolerance) return false;
+            if (relDiff(frame1.moveDirection.x, frame2.moveDirection.x) > tolerance) return false;
+            if (relDiff(frame1.moveDirection.y, frame2.moveDirection.y) > tolerance) return false;
+            if (relDiff(frame1.moveDirection.z, frame2.moveDirection.z) > tolerance) return false;
+            
+            // Time difference - jika waktu terlalu dekat, kemungkinan duplikat
+            const timeDiff = Math.abs(frame1.time - frame2.time);
+            if (timeDiff < 0.001) return true; // Hampir waktu yang sama = duplikat
             
             // Boolean dan string harus sama persis
             if (frame1.state !== frame2.state) return false;
