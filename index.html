@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JSON Position Bypass Processor</title>
+    <title>Remove Duplicate Tool</title>
     <style>
         * {
             margin: 0;
@@ -19,11 +19,11 @@
         }
         
         .container {
-            max-width: 900px;
+            max-width: 1200px;
             margin: 0 auto;
             background: white;
-            border-radius: 16px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
             overflow: hidden;
         }
         
@@ -48,903 +48,445 @@
             padding: 30px;
         }
         
-        .upload-area {
-            border: 3px dashed #667eea;
-            border-radius: 12px;
-            padding: 40px;
-            text-align: center;
-            background: #f8f9ff;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-bottom: 25px;
+        .input-section {
+            margin-bottom: 30px;
         }
         
-        .upload-area:hover {
-            border-color: #764ba2;
-            background: #f0f2ff;
-        }
-        
-        .upload-area.dragover {
-            border-color: #764ba2;
-            background: #e8ebff;
-            transform: scale(1.02);
-        }
-        
-        .upload-icon {
-            font-size: 48px;
-            margin-bottom: 15px;
-        }
-        
-        .settings {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 8px;
+        .input-group {
             margin-bottom: 20px;
         }
         
-        .settings h3 {
-            color: #667eea;
-            margin-bottom: 15px;
-            font-size: 18px;
-        }
-        
-        .setting-group {
-            margin-bottom: 15px;
-        }
-        
-        .setting-group label {
+        .input-group label {
             display: block;
-            margin-bottom: 5px;
-            font-weight: 500;
+            margin-bottom: 8px;
+            font-weight: 600;
             color: #333;
         }
         
-        .setting-group input[type="number"],
-        .setting-group input[type="text"] {
+        .input-group textarea {
             width: 100%;
+            min-height: 150px;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            resize: vertical;
+            transition: border-color 0.3s;
+        }
+        
+        .input-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .input-group input[type="number"] {
+            width: 200px;
             padding: 10px;
-            border: 2px solid #ddd;
-            border-radius: 6px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        .input-group input[type="number"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .drop-zone {
+            border: 3px dashed #cbd5e0;
+            border-radius: 12px;
+            padding: 60px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #f7fafc;
+        }
+        
+        .drop-zone:hover {
+            border-color: #667eea;
+            background: #edf2f7;
+        }
+        
+        .drop-zone.dragover {
+            border-color: #667eea;
+            background: #e6f7ff;
+            transform: scale(1.02);
+        }
+        
+        .drop-content {
+            pointer-events: none;
+        }
+        
+        .upload-icon {
+            font-size: 64px;
+            margin-bottom: 15px;
+        }
+        
+        .drop-zone h3 {
+            font-size: 20px;
+            color: #2d3748;
+            margin-bottom: 8px;
+        }
+        
+        .drop-zone p {
+            color: #718096;
             font-size: 14px;
         }
         
-        .setting-group input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-            margin-right: 8px;
-            cursor: pointer;
+        .file-name {
+            margin-top: 15px;
+            padding: 12px;
+            background: #e6fffa;
+            border-radius: 8px;
+            color: #234e52;
+            font-weight: 600;
+            display: none;
         }
         
-        .checkbox-label {
+        .file-name.show {
+            display: block;
+        }
+        
+        .button-group {
             display: flex;
-            align-items: center;
-            cursor: pointer;
-            padding: 8px 0;
-        }
-        
-        .grid-2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
             gap: 15px;
+            margin-bottom: 20px;
         }
         
-        .btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+        button {
+            padding: 12px 30px;
             border: none;
-            padding: 14px 30px;
             border-radius: 8px;
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
-            width: 100%;
-            margin-top: 10px;
         }
         
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
-        }
-        
-        .btn:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-            transform: none;
-        }
-        
-        .btn-download-all {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            margin-top: 15px;
-            display: none;
-        }
-        
-        .btn-download-all:hover {
-            box-shadow: 0 8px 20px rgba(240, 147, 251, 0.4);
-        }
-        
-        .file-list {
-            margin-top: 20px;
-        }
-        
-        .file-item {
-            background: white;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .file-info {
-            flex: 1;
-        }
-        
-        .file-name {
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 5px;
-        }
-        
-        .file-status {
-            font-size: 13px;
-            color: #666;
-        }
-        
-        .status-success {
-            color: #28a745;
-        }
-        
-        .status-error {
-            color: #dc3545;
-        }
-        
-        .download-btn {
-            background: #28a745;
+        .btn-process {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            border: none;
-            padding: 8px 20px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
         }
         
-        .download-btn:hover {
-            background: #218838;
+        .btn-process:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
         }
         
-        .log {
-            background: #1e1e1e;
-            color: #d4d4d4;
+        .btn-copy {
+            background: #48bb78;
+            color: white;
+        }
+        
+        .btn-copy:hover {
+            background: #38a169;
+            transform: translateY(-2px);
+        }
+        
+        .btn-clear {
+            background: #f56565;
+            color: white;
+        }
+        
+        .btn-clear:hover {
+            background: #e53e3e;
+            transform: translateY(-2px);
+        }
+        
+        .stats {
+            background: #f7fafc;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .stats.show {
+            display: block;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .stat-item {
+            background: white;
             padding: 15px;
             border-radius: 8px;
-            font-family: 'Courier New', monospace;
-            font-size: 13px;
-            max-height: 200px;
-            overflow-y: auto;
-            margin-top: 20px;
+            border-left: 4px solid #667eea;
         }
         
-        .log-line {
+        .stat-label {
+            font-size: 12px;
+            color: #718096;
             margin-bottom: 5px;
         }
         
-        input[type="file"] {
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #2d3748;
+        }
+        
+        .output-section {
             display: none;
+        }
+        
+        .output-section.show {
+            display: block;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #48bb78;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            opacity: 0;
+            transform: translateX(400px);
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+        
+        .notification.show {
+            opacity: 1;
+            transform: translateX(0);
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>🎯 JSON Position Bypass Processor</h1>
-            <p>Remove duplicate positions dan bypass time gaps dari file JSON</p>
+            <h1>🔧 Remove Duplicate Data Tool</h1>
+            <p>Hapus data duplikat dengan tolerance jarak 0.1</p>
         </div>
         
         <div class="content">
-            <div class="upload-area" id="uploadArea">
-                <div class="upload-icon">📁</div>
-                <h3>Drag & Drop file JSON di sini</h3>
-                <p>atau klik untuk memilih file</p>
-                <input type="file" id="fileInput" accept=".json" multiple>
-            </div>
-            
-            <div class="settings">
-                <h3>⚙️ Pengaturan</h3>
-                
-                <div class="info-box" style="background: #dbeafe; border-left: 4px solid #3b82f6; padding: 15px; margin-bottom: 20px; border-radius: 8px;">
-                    <strong>📘 Penjelasan Parameter:</strong><br><br>
-                    
-                    <strong>1. Tolerance (Toleransi Posisi):</strong><br>
-                    • Menentukan seberapa "mirip" posisi dianggap sama<br>
-                    • Contoh: tolerance 0.1 = posisi dengan selisih ≤0.1 di X/Y/Z dianggap sama<br>
-                    • <span style="color: #059669;">✅ 0.01-0.1</span>: Recommended (ketat tapi tidak terlalu sensitif)<br>
-                    • <span style="color: #dc2626;">⚠️ 0.001</span>: Terlalu ketat (hampir tidak ada yang dihapus)<br>
-                    • <span style="color: #dc2626;">⚠️ 1.0+</span>: Terlalu longgar (banyak frame berbeda ikut terhapus)<br><br>
-                    
-                    <strong>2. Min Consecutive (Minimum Duplikat Berurutan):</strong><br>
-                    • Berapa kali posisi harus berulang berturut-turut baru dihapus<br>
-                    • Contoh: Min=2 → frame ke-2 dst akan dihapus jika posisi sama<br>
-                    • <span style="color: #059669;">✅ 2</span>: Recommended (hapus dari duplikat ke-2)<br>
-                    • <span style="color: #dc2626;">⚠️ 1</span>: Terlalu agresif (hapus semua duplikat termasuk yang pertama)<br>
-                    • Min=3 → lebih konservatif (keep 2 frame pertama, hapus sisanya)<br><br>
-                    
-                    <strong>3. Delta (untuk Reassign Times):</strong><br>
-                    • Jarak waktu antar frame jika mode "Reassign Times" aktif<br>
-                    • <span style="color: #059669;">✅ 0.016</span>: 60 FPS (1/60 = 0.0166...)<br>
-                    • 0.033: 30 FPS | 0.008: 120 FPS | 0.004: 240 FPS<br>
-                    • ⚠️ Hanya berlaku jika "Reassign Times" dicentang<br><br>
-                    
-                    <strong>4. Mode Deduplication:</strong><br>
-                    • <strong>Consecutive</strong>: Hapus duplikat yang berurutan saja (A,A,A,B,B,A → A,B,A)<br>
-                    • <strong>Global</strong>: Hapus SEMUA duplikat di file (A,A,B,A,B → A,B - keep pertama saja)<br><br>
-                    
-                    <strong>5. Aggressive Bypass:</strong><br>
-                    • ON: Deteksi duplikat lebih ketat + bypass time lebih akurat<br>
-                    • OFF: Gunakan algoritma standar (lebih konservatif)<br><br>
-                    
-                    <strong>6. Reassign Times:</strong><br>
-                    • ON: Waktu di-reset dari 0 dengan interval Delta yang tetap<br>
-                    • OFF: Bypass waktu frame yang dihapus (recommended untuk preserve timing)<br><br>
-                    
-                    <strong>💡 Setting Recommended:</strong><br>
-                    Tolerance: 0.1 | Min Consecutive: 2 | Aggressive: ON | Reassign Times: OFF
-                </div>
-                
-                <div class="grid-2">
-                    <div class="setting-group">
-                        <label>Tolerance (Position Similarity):</label>
-                        <input type="number" id="tol" value="0.1" step="0.01" min="0" max="10">
-                        <small style="color: #666; font-size: 11px;">📏 Recommended: 0.01 - 0.1 (semakin kecil = semakin ketat)</small>
+            <div class="input-section">
+                <div class="input-group">
+                    <label>Input JSON File:</label>
+                    <div id="dropZone" class="drop-zone">
+                        <div class="drop-content">
+                            <div class="upload-icon">📁</div>
+                            <h3>Drag & Drop JSON file here</h3>
+                            <p>or click to browse</p>
+                            <input type="file" id="fileInput" accept=".json" hidden>
+                        </div>
                     </div>
-                    
-                    <div class="setting-group">
-                        <label>Min Consecutive (Frames to Keep):</label>
-                        <input type="number" id="minConsecutive" value="2" min="1" max="10">
-                        <small style="color: #666; font-size: 11px;">🔢 Recommended: 2 (hapus dari frame duplikat ke-2 dst)</small>
-                    </div>
+                    <div id="fileName" class="file-name"></div>
                 </div>
                 
-                <div class="grid-2">
-                    <div class="setting-group">
-                        <label>Delta / FPS (for reassign mode):</label>
-                        <input type="number" id="delta" value="0.016" step="0.001" min="0.001">
-                        <small style="color: #666; font-size: 11px;">⏱️ 0.016=60fps | 0.033=30fps | 0.008=120fps</small>
-                    </div>
-                    
-                    <div class="setting-group">
-                        <label class="checkbox-label">
-                            <input type="checkbox" id="prettyPrint">
-                            <span>Pretty Print JSON (readable format)</span>
-                        </label>
-                    </div>
+                <div class="input-group">
+                    <label for="tolerance">Tolerance (default: 0.1):</label>
+                    <input type="number" id="tolerance" value="0.1" step="0.01" min="0">
                 </div>
                 
-                <div class="setting-group">
-                    <label class="checkbox-label">
-                        <input type="checkbox" id="globalDedupe">
-                        <span><strong>Global Deduplication</strong> - Hapus SEMUA duplikat (bukan hanya consecutive)</span>
-                    </label>
-                    <small style="color: #666; font-size: 11px; margin-left: 26px; display: block;">
-                        ⚠️ Global mode lebih agresif: jika posisi X muncul 5x, hanya 1 yang disimpan
-                    </small>
-                </div>
-                
-                <div class="setting-group">
-                    <label class="checkbox-label">
-                        <input type="checkbox" id="aggressiveBypass" checked>
-                        <span><strong>Aggressive Bypass</strong> - Deteksi duplikat ketat + bypass time optimal</span>
-                    </label>
-                    <small style="color: #059669; font-size: 11px; margin-left: 26px; display: block;">
-                        ✅ Recommended: ON untuk hasil terbaik
-                    </small>
-                </div>
-                
-                <div class="setting-group">
-                    <label class="checkbox-label">
-                        <input type="checkbox" id="reassignTimes">
-                        <span><strong>Reassign Times</strong> - Reset waktu dari 0 dengan interval Delta</span>
-                    </label>
-                    <small style="color: #666; font-size: 11px; margin-left: 26px; display: block;">
-                        ⚠️ OFF = bypass time (preserve timing original) | ON = reset timing
-                    </small>
-                </div>
-                
-                <div class="setting-group">
-                    <label class="checkbox-label">
-                        <input type="checkbox" id="keepFirstTime">
-                        <span>Keep First Time (pertahankan waktu entry pertama saat reassign)</span>
-                    </label>
-                    <small style="color: #666; font-size: 11px; margin-left: 26px; display: block;">
-                        Hanya berlaku jika Reassign Times aktif
-                    </small>
+                <div class="button-group">
+                    <button class="btn-clear" onclick="clearAll()">🗑️ Clear All</button>
                 </div>
             </div>
             
-            <button class="btn" id="processBtn" disabled>Proses File</button>
+            <div class="stats" id="stats">
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-label">Original Data</div>
+                        <div class="stat-value" id="originalCount">0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">After Remove Duplicate</div>
+                        <div class="stat-value" id="filteredCount">0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Removed</div>
+                        <div class="stat-value" id="removedCount">0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Percentage Kept</div>
+                        <div class="stat-value" id="percentage">0%</div>
+                    </div>
+                </div>
+            </div>
             
-            <button class="btn btn-download-all" id="downloadAllBtn">📦 Download All as ZIP</button>
-            
-            <div class="file-list" id="fileList"></div>
-            
-            <div class="log" id="log" style="display: none;"></div>
+            <div class="output-section" id="outputSection">
+                <div class="input-group">
+                    <label for="jsonOutput">Output JSON (Clean Data):</label>
+                    <textarea id="jsonOutput" readonly></textarea>
+                </div>
+                
+                <div class="button-group">
+                    <button class="btn-copy" onclick="copyOutput()">📋 Copy Output</button>
+                    <button class="btn-copy" onclick="downloadOutput()" style="background: #4299e1;">💾 Download JSON</button>
+                </div>
+            </div>
         </div>
     </div>
-
+    
+    <div class="notification" id="notification"></div>
+    
     <script>
-        let selectedFiles = [];
-        let processedFiles = [];
-
-        const uploadArea = document.getElementById('uploadArea');
+        let currentData = null;
+        
+        // Drag and Drop
+        const dropZone = document.getElementById('dropZone');
         const fileInput = document.getElementById('fileInput');
-        const processBtn = document.getElementById('processBtn');
-        const downloadAllBtn = document.getElementById('downloadAllBtn');
-        const fileList = document.getElementById('fileList');
-        const logDiv = document.getElementById('log');
-
-        // Upload area events
-        uploadArea.addEventListener('click', () => fileInput.click());
         
-        uploadArea.addEventListener('dragover', (e) => {
+        dropZone.addEventListener('click', () => fileInput.click());
+        
+        dropZone.addEventListener('dragover', (e) => {
             e.preventDefault();
-            uploadArea.classList.add('dragover');
+            dropZone.classList.add('dragover');
         });
         
-        uploadArea.addEventListener('dragleave', () => {
-            uploadArea.classList.remove('dragover');
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragover');
         });
         
-        uploadArea.addEventListener('drop', (e) => {
+        dropZone.addEventListener('drop', (e) => {
             e.preventDefault();
-            uploadArea.classList.remove('dragover');
-            handleFiles(e.dataTransfer.files);
+            dropZone.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
         });
         
         fileInput.addEventListener('change', (e) => {
-            handleFiles(e.target.files);
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
         });
-
-        function handleFiles(files) {
-            selectedFiles = Array.from(files).filter(f => f.name.toLowerCase().endsWith('.json'));
-            
-            if (selectedFiles.length === 0) {
-                addLog('❌ Tidak ada file JSON yang valid');
+        
+        function handleFile(file) {
+            if (!file.name.endsWith('.json')) {
+                showNotification('⚠️ Please upload a JSON file!', '#f56565');
                 return;
             }
             
-            processBtn.disabled = false;
-            addLog(`✅ ${selectedFiles.length} file JSON dipilih`);
-            displaySelectedFiles();
-        }
-
-        function displaySelectedFiles() {
-            fileList.innerHTML = '<h3 style="margin-bottom: 10px;">File yang dipilih:</h3>';
-            selectedFiles.forEach(file => {
-                const div = document.createElement('div');
-                div.className = 'file-item';
-                div.innerHTML = `
-                    <div class="file-info">
-                        <div class="file-name">${file.name}</div>
-                        <div class="file-status">Menunggu proses...</div>
-                    </div>
-                `;
-                fileList.appendChild(div);
-            });
-        }
-
-        processBtn.addEventListener('click', processFiles);
-
-        async function processFiles() {
-            processBtn.disabled = true;
-            processedFiles = [];
-            downloadAllBtn.style.display = 'none';
-            logDiv.style.display = 'block';
-            logDiv.innerHTML = '';
-            
-            const settings = {
-                tol: parseFloat(document.getElementById('tol').value),
-                minConsecutive: parseInt(document.getElementById('minConsecutive').value),
-                delta: parseFloat(document.getElementById('delta').value),
-                prettyPrint: document.getElementById('prettyPrint').checked,
-                globalDedupe: document.getElementById('globalDedupe').checked,
-                aggressiveBypass: document.getElementById('aggressiveBypass').checked,
-                reassignTimes: document.getElementById('reassignTimes').checked,
-                keepFirstTime: document.getElementById('keepFirstTime').checked
-            };
-
-            addLog('🚀 Memulai pemrosesan...');
-            addLog(`⚙️ Mode: ${settings.globalDedupe ? 'GLOBAL' : 'CONSECUTIVE'} | Aggressive: ${settings.aggressiveBypass ? 'ON' : 'OFF'}`);
-            addLog(`📊 Tolerance: ${settings.tol} | Min Consecutive: ${settings.minConsecutive}`);
-            addLog(`⏱️ Bypass Mode: ${settings.reassignTimes ? 'REASSIGN (Delta=' + settings.delta + ')' : 'BYPASS TIME'}`);
-            addLog('');
-            
-            for (let i = 0; i < selectedFiles.length; i++) {
-                const file = selectedFiles[i];
-                addLog(`📄 Memproses ${file.name}...`);
-                
+            const reader = new FileReader();
+            reader.onload = (e) => {
                 try {
-                    const result = await processFile(file, settings);
-                    processedFiles.push(result);
-                    updateFileStatus(i, true, result.stats);
+                    const data = JSON.parse(e.target.result);
+                    document.getElementById('fileName').textContent = '✅ File loaded: ' + file.name;
+                    document.getElementById('fileName').classList.add('show');
                     
-                    const percent = ((result.stats.removed / result.stats.original) * 100).toFixed(1);
-                    addLog(`✅ ${file.name}:`);
-                    addLog(`   Kept: ${result.stats.kept}/${result.stats.original} | Removed: ${result.stats.removed} (${percent}%)`);
-                    addLog(`   Time range: ${result.stats.timeStart?.toFixed(3)}s - ${result.stats.timeEnd?.toFixed(3)}s`);
-                    addLog('');
+                    processData(data);
                 } catch (error) {
-                    updateFileStatus(i, false, null, error.message);
-                    addLog(`❌ ${file.name}: ${error.message}`);
+                    showNotification('❌ Invalid JSON file!', '#f56565');
                 }
-            }
-            
-            addLog('✨ Selesai! Klik tombol download untuk mengunduh file.');
-            
-            // Show download all button if 3 or more files
-            if (processedFiles.length >= 3) {
-                downloadAllBtn.style.display = 'block';
-            }
-            
-            processBtn.disabled = false;
-        }
-
-        async function processFile(file, settings) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                
-                reader.onload = (e) => {
-                    try {
-                        const data = JSON.parse(e.target.result);
-                        
-                        if (!Array.isArray(data)) {
-                            reject(new Error('File bukan array JSON'));
-                            return;
-                        }
-                        
-                        const original = data.length;
-                        let keptIndices;
-                        
-                        // Apply aggressive deduplication if enabled
-                        if (settings.aggressiveBypass) {
-                            if (settings.globalDedupe) {
-                                keptIndices = compressAggressiveGlobal(data, settings.tol);
-                            } else {
-                                keptIndices = compressAggressiveConsecutive(data, settings.tol, settings.minConsecutive);
-                            }
-                        } else {
-                            if (settings.globalDedupe) {
-                                keptIndices = compressGlobal(data, settings.tol);
-                            } else {
-                                keptIndices = compressConsecutive(data, settings.tol, settings.minConsecutive);
-                            }
-                        }
-                        
-                        let output;
-                        if (settings.reassignTimes) {
-                            const keptData = keptIndices.map(idx => data[idx]);
-                            output = reassignTimes(keptData, settings.delta, settings.keepFirstTime);
-                        } else {
-                            output = bypassRemovedTimes(data, keptIndices);
-                        }
-                        
-                        const jsonStr = settings.prettyPrint 
-                            ? JSON.stringify(output, null, 2)
-                            : JSON.stringify(output);
-                        
-                        resolve({
-                            name: file.name,
-                            content: jsonStr,
-                            stats: {
-                                original: original,
-                                kept: output.length,
-                                removed: original - output.length,
-                                timeStart: output[0]?.time || 0,
-                                timeEnd: output[output.length - 1]?.time || 0
-                            }
-                        });
-                    } catch (error) {
-                        reject(error);
-                    }
-                };
-                
-                reader.onerror = () => reject(new Error('Gagal membaca file'));
-                reader.readAsText(file);
-            });
-        }
-
-        // ORIGINAL ALGORITHM FROM YOUR PYTHON SCRIPT
-        function positionTuple(entry) {
-            const p = entry.position || {};
-            return {
-                x: parseFloat(p.x || 0),
-                y: parseFloat(p.y || 0),
-                z: parseFloat(p.z || 0)
             };
+            reader.readAsText(file);
         }
-
-        function almostEqual(a, b, tol) {
-            return Math.abs(a.x - b.x) <= tol &&
-                   Math.abs(a.y - b.y) <= tol &&
-                   Math.abs(a.z - b.z) <= tol;
+        
+        function calculateDistance(pos1, pos2) {
+            const dx = pos1.x - pos2.x;
+            const dy = pos1.y - pos2.y;
+            const dz = pos1.z - pos2.z;
+            return Math.sqrt(dx * dx + dy * dy + dz * dz);
         }
-
-        function quantizeKey(pos, tol) {
-            const q = tol > 0 ? tol : 1e-9;
-            return `${Math.round(pos.x / q)},${Math.round(pos.y / q)},${Math.round(pos.z / q)}`;
-        }
-
-        // AGGRESSIVE CONSECUTIVE - Lebih ketat menghapus duplikat berurutan
-        function compressAggressiveConsecutive(data, tol, minConsecutive) {
-            if (data.length === 0) return [];
+        
+        function removeDuplicates(data, tolerance) {
+            if (!data || data.length === 0) return [];
             
-            const kept = [];
-            let prevPos = null;
-            let consecutiveCount = 0;
-            let lastKeptIndex = -1;
+            const result = [data[0]];
             
-            for (let i = 0; i < data.length; i++) {
-                const cur = positionTuple(data[i]);
+            for (let i = 1; i < data.length; i++) {
+                const current = data[i];
+                const last = result[result.length - 1];
                 
-                if (prevPos === null) {
-                    // Always keep first frame
-                    kept.push(i);
-                    prevPos = cur;
-                    consecutiveCount = 1;
-                    lastKeptIndex = i;
-                    continue;
-                }
+                const distance = calculateDistance(current.position, last.position);
                 
-                // Check if position is duplicate
-                const isDuplicate = almostEqual(cur, prevPos, tol);
-                
-                if (isDuplicate) {
-                    consecutiveCount++;
-                    // Only keep if we haven't reached minConsecutive threshold
-                    if (consecutiveCount < minConsecutive) {
-                        kept.push(i);
-                        lastKeptIndex = i;
-                    }
-                    // If >= minConsecutive, skip this frame (remove it)
-                } else {
-                    // Position changed, always keep
-                    kept.push(i);
-                    prevPos = cur;
-                    consecutiveCount = 1;
-                    lastKeptIndex = i;
+                if (distance > tolerance) {
+                    result.push(current);
                 }
             }
             
-            return kept;
+            return result;
         }
-
-        // AGGRESSIVE GLOBAL - Hapus SEMUA duplikat dengan presisi tinggi
-        function compressAggressiveGlobal(data, tol) {
-            if (data.length === 0) return [];
-            
-            const kept = [];
-            const seenPositions = [];
-            
-            for (let i = 0; i < data.length; i++) {
-                const cur = positionTuple(data[i]);
-                let isDuplicate = false;
+        
+        function processData(originalData) {
+            try {
+                const tolerance = parseFloat(document.getElementById('tolerance').value);
                 
-                // Check against all previously kept positions
-                for (let j = 0; j < seenPositions.length; j++) {
-                    if (almostEqual(cur, seenPositions[j], tol)) {
-                        isDuplicate = true;
-                        break;
-                    }
+                if (!Array.isArray(originalData)) {
+                    showNotification('⚠️ Data must be a JSON array!', '#f56565');
+                    return;
                 }
                 
-                if (!isDuplicate) {
-                    kept.push(i);
-                    seenPositions.push(cur);
-                }
-            }
-            
-            return kept;
-        }
-
-        // CONSECUTIVE MODE - Original Python algorithm
-        function compressConsecutive(data, tol, minConsecutive) {
-            if (data.length === 0) return [];
-            
-            const kept = [];
-            let prevPos = null;
-            let run = 0;
-            
-            for (let i = 0; i < data.length; i++) {
-                const cur = positionTuple(data[i]);
+                const filteredData = removeDuplicates(originalData, tolerance);
+                currentData = filteredData;
                 
-                if (prevPos === null) {
-                    kept.push(i);
-                    prevPos = cur;
-                    run = 1;
-                    continue;
-                }
+                document.getElementById('originalCount').textContent = originalData.length;
+                document.getElementById('filteredCount').textContent = filteredData.length;
+                document.getElementById('removedCount').textContent = originalData.length - filteredData.length;
                 
-                if (almostEqual(cur, prevPos, tol)) {
-                    run++;
-                    if (run >= minConsecutive) {
-                        continue; // Skip this duplicate
-                    }
-                    kept.push(i);
-                } else {
-                    kept.push(i);
-                    prevPos = cur;
-                    run = 1;
-                }
-            }
-            
-            return kept;
-        }
-
-        // GLOBAL MODE - Original Python algorithm
-        function compressGlobal(data, tol) {
-            if (data.length === 0) return [];
-            
-            const seen = new Set();
-            const kept = [];
-            
-            for (let i = 0; i < data.length; i++) {
-                const key = quantizeKey(positionTuple(data[i]), tol);
-                if (seen.has(key)) {
-                    continue; // Skip duplicate
-                }
-                seen.add(key);
-                kept.push(i);
-            }
-            
-            return kept;
-        }
-
-        function reassignTimes(data, delta, keepFirstTime) {
-            if (data.length === 0) return [];
-            
-            const start = keepFirstTime ? parseFloat(data[0].time || 0) : 0;
-            return data.map((e, i) => {
-                const entry = {...e};
-                entry.time = start + i * delta;
-                return entry;
-            });
-        }
-
-        // ENHANCED BYPASS TIME - Perhitungan bypass yang lebih detail dan akurat
-        function bypassRemovedTimes(raw, keptIndices) {
-            if (raw.length === 0) return [];
-            if (keptIndices.length === 0) return [];
-            
-            const n = raw.length;
-            const times = raw.map(e => parseFloat(e.time || 0));
-            
-            // Calculate precise deltas between consecutive frames
-            const deltas = [0]; // First frame has no delta
-            for (let i = 1; i < n; i++) {
-                const delta = times[i] - times[i - 1];
-                deltas.push(delta >= 0 ? delta : 0); // Ensure non-negative delta
-            }
-            
-            const keptSet = new Set(keptIndices);
-            const output = [];
-            let cumulativeRemovedTime = 0.0;
-            
-            // Process each frame
-            for (let i = 0; i < n; i++) {
-                if (keptSet.has(i)) {
-                    // This frame is kept - adjust its time by removing accumulated time
-                    const entry = {...raw[i]};
-                    const adjustedTime = times[i] - cumulativeRemovedTime;
-                    entry.time = Math.max(0, adjustedTime); // Ensure non-negative time
-                    output.push(entry);
-                } else {
-                    // This frame is removed - add its duration to the cumulative removed time
-                    // The duration of this frame is the delta to the next frame
-                    if (i < n - 1) {
-                        cumulativeRemovedTime += deltas[i + 1];
-                    }
-                }
-            }
-            
-            // Validate output times are monotonically increasing
-            for (let i = 1; i < output.length; i++) {
-                if (output[i].time < output[i - 1].time) {
-                    // Fix any backwards time by using previous time + small delta
-                    output[i].time = output[i - 1].time + 0.001;
-                }
-            }
-            
-            return output;
-        }
-
-        function updateFileStatus(index, success, stats, error) {
-            const items = fileList.querySelectorAll('.file-item');
-            if (items[index]) {
-                const statusDiv = items[index].querySelector('.file-status');
-                if (success) {
-                    statusDiv.className = 'file-status status-success';
-                    statusDiv.textContent = `Berhasil: ${stats.kept}/${stats.original} (dihapus: ${stats.removed})`;
-                    
-                    const btn = document.createElement('button');
-                    btn.className = 'download-btn';
-                    btn.textContent = '⬇️ Download';
-                    btn.onclick = () => downloadFile(index);
-                    items[index].appendChild(btn);
-                } else {
-                    statusDiv.className = 'file-status status-error';
-                    statusDiv.textContent = `Error: ${error}`;
-                }
+                const percentage = ((filteredData.length / originalData.length) * 100).toFixed(1);
+                document.getElementById('percentage').textContent = percentage + '%';
+                
+                document.getElementById('jsonOutput').value = JSON.stringify(filteredData, null, 2);
+                
+                document.getElementById('stats').classList.add('show');
+                document.getElementById('outputSection').classList.add('show');
+                
+                showNotification('✅ Data processed successfully!', '#48bb78');
+                
+            } catch (error) {
+                showNotification('❌ Error: ' + error.message, '#f56565');
             }
         }
-
-        function downloadFile(index) {
-            const file = processedFiles[index];
-            const blob = new Blob([file.content], { type: 'application/json' });
+        
+        function copyOutput() {
+            const output = document.getElementById('jsonOutput');
+            output.select();
+            document.execCommand('copy');
+            showNotification('✅ Copied to clipboard!', '#48bb78');
+        }
+        
+        function downloadOutput() {
+            if (!currentData) {
+                showNotification('⚠️ No data to download!', '#f56565');
+                return;
+            }
+            
+            const dataStr = JSON.stringify(currentData, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = file.name;
+            a.download = 'filtered_data.json';
             a.click();
             URL.revokeObjectURL(url);
+            
+            showNotification('💾 File downloaded!', '#48bb78');
         }
-
-        // Download All as ZIP
-        downloadAllBtn.addEventListener('click', async () => {
-            if (processedFiles.length === 0) return;
-            
-            addLog('\n📦 Membuat ZIP file...');
-            downloadAllBtn.disabled = true;
-            
-            try {
-                const zip = await createZipFile(processedFiles);
-                const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
-                const zipFilename = `processed_json_${timestamp}.zip`;
-                
-                const url = URL.createObjectURL(zip);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = zipFilename;
-                a.click();
-                URL.revokeObjectURL(url);
-                
-                addLog(`✅ ZIP berhasil didownload: ${zipFilename} (${processedFiles.length} files)`);
-            } catch (error) {
-                addLog(`❌ Error membuat ZIP: ${error.message}`);
-            }
-            
-            downloadAllBtn.disabled = false;
-        });
-
-        async function createZipFile(files) {
-            const encoder = new TextEncoder();
-            const zipParts = [];
-            const centralDirectory = [];
-            let offset = 0;
-            
-            for (let i = 0; i < files.length; i++) {
-                const file = files[i];
-                const filename = file.name;
-                const content = encoder.encode(file.content);
-                
-                const localHeader = createLocalFileHeader(filename, content);
-                zipParts.push(localHeader);
-                zipParts.push(content);
-                
-                const cdEntry = createCentralDirectoryEntry(filename, content, offset);
-                centralDirectory.push(cdEntry);
-                
-                offset += localHeader.byteLength + content.byteLength;
-            }
-            
-            const cd = concatenateArrays(centralDirectory);
-            zipParts.push(cd);
-            
-            const eocd = createEndOfCentralDirectory(files.length, cd.byteLength, offset);
-            zipParts.push(eocd);
-            
-            return new Blob(zipParts, { type: 'application/zip' });
+        
+        function clearAll() {
+            fileInput.value = '';
+            document.getElementById('jsonOutput').value = '';
+            document.getElementById('fileName').classList.remove('show');
+            document.getElementById('stats').classList.remove('show');
+            document.getElementById('outputSection').classList.remove('show');
+            document.getElementById('tolerance').value = '0.1';
+            currentData = null;
+            showNotification('🗑️ All cleared!', '#667eea');
         }
-
-        function createLocalFileHeader(filename, content) {
-            const filenameBytes = new TextEncoder().encode(filename);
-            const header = new Uint8Array(30 + filenameBytes.length);
-            const view = new DataView(header.buffer);
+        
+        function showNotification(message, color) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.style.background = color;
+            notification.classList.add('show');
             
-            view.setUint32(0, 0x04034b50, true);
-            view.setUint16(4, 20, true);
-            view.setUint16(6, 0, true);
-            view.setUint16(8, 0, true);
-            view.setUint16(10, 0, true);
-            view.setUint16(12, 0, true);
-            view.setUint32(14, crc32(content), true);
-            view.setUint32(18, content.byteLength, true);
-            view.setUint32(22, content.byteLength, true);
-            view.setUint16(26, filenameBytes.length, true);
-            view.setUint16(28, 0, true);
-            
-            header.set(filenameBytes, 30);
-            return header;
-        }
-
-        function createCentralDirectoryEntry(filename, content, offset) {
-            const filenameBytes = new TextEncoder().encode(filename);
-            const entry = new Uint8Array(46 + filenameBytes.length);
-            const view = new DataView(entry.buffer);
-            
-            view.setUint32(0, 0x02014b50, true);
-            view.setUint16(4, 20, true);
-            view.setUint16(6, 20, true);
-            view.setUint16(8, 0, true);
-            view.setUint16(10, 0, true);
-            view.setUint16(12, 0, true);
-            view.setUint16(14, 0, true);
-            view.setUint32(16, crc32(content), true);
-            view.setUint32(20, content.byteLength, true);
-            view.setUint32(24, content.byteLength, true);
-            view.setUint16(28, filenameBytes.length, true);
-            view.setUint16(30, 0, true);
-            view.setUint16(32, 0, true);
-            view.setUint16(34, 0, true);
-            view.setUint16(36, 0, true);
-            view.setUint32(38, 0, true);
-            view.setUint32(42, offset, true);
-            
-            entry.set(filenameBytes, 46);
-            return entry;
-        }
-
-        function createEndOfCentralDirectory(numFiles, cdSize, cdOffset) {
-            const eocd = new Uint8Array(22);
-            const view = new DataView(eocd.buffer);
-            
-            view.setUint32(0, 0x06054b50, true);
-            view.setUint16(4, 0, true);
-            view.setUint16(6, 0, true);
-            view.setUint16(8, numFiles, true);
-            view.setUint16(10, numFiles, true);
-            view.setUint32(12, cdSize, true);
-            view.setUint32(16, cdOffset, true);
-            view.setUint16(20, 0, true);
-            
-            return eocd;
-        }
-
-        function crc32(data) {
-            const table = [];
-            for (let i = 0; i < 256; i++) {
-                let c = i;
-                for (let j = 0; j < 8; j++) {
-                    c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
-                }
-                table[i] = c;
-            }
-            
-            let crc = 0xFFFFFFFF;
-            for (let i = 0; i < data.length; i++) {
-                crc = table[(crc ^ data[i]) & 0xFF] ^ (crc >>> 8);
-            }
-            return (crc ^ 0xFFFFFFFF) >>> 0;
-        }
-
-        function concatenateArrays(arrays) {
-            const totalLength = arrays.reduce((sum, arr) => sum + arr.byteLength, 0);
-            const result = new Uint8Array(totalLength);
-            let offset = 0;
-            for (const arr of arrays) {
-                result.set(new Uint8Array(arr), offset);
-                offset += arr.byteLength;
-            }
-            return result;
-        }
-
-        function addLog(message) {
-            const line = document.createElement('div');
-            line.className = 'log-line';
-            line.textContent = message;
-            logDiv.appendChild(line);
-            logDiv.scrollTop = logDiv.scrollHeight;
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
         }
     </script>
 </body>
