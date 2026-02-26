@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>JSON File API</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+    .container { max-width: 640px; width: 90%; text-align: center; padding: 2rem; }
+    h1 { font-size: 2rem; color: #7ee8a2; margin-bottom: 0.5rem; }
+    p { color: #aaa; margin-bottom: 2rem; }
+    .card { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; text-align: left; }
+    .card h2 { color: #7ee8a2; font-size: 1rem; margin-bottom: 0.75rem; }
+    code { background: #111; padding: 0.6rem 1rem; display: block; border-radius: 8px; font-size: 0.85rem; color: #f0c674; overflow-x: auto; white-space: pre; }
+    .tag { display: inline-block; background: #2a2a2a; color: #7ee8a2; font-size: 0.75rem; padding: 2px 8px; border-radius: 4px; margin-bottom: 0.5rem; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📦 JSON File API</h1>
+    <p>Proxy API untuk download file JSON dengan sistem token autentikasi.</p>
+
+    <div class="card">
+      <span class="tag">GET</span>
+      <h2>Download File</h2>
+      <code>/api/json/{filename}?token={TOKEN}</code>
+      <br/>
+      <small style="color:#888">Contoh:</small>
+      <code>/api/json/mount_velora.json?token=5PloBkNbTn4zV8YLjsVJVNweS1J2LbwU</code>
+    </div>
+
+    <div class="card">
+      <span class="tag">GET</span>
+      <h2>List Semua File</h2>
+      <code>/api/list?token={TOKEN}</code>
+    </div>
+
+    <div class="card">
+      <h2>⚙️ Environment Variables</h2>
+      <code>VALID_TOKENS=token1,token2,token3</code>
+    </div>
+  </div>
+</body>
+</html>

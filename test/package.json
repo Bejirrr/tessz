@@ -1,0 +1,9 @@
+{
+  "name": "vercel-json-api",
+  "version": "1.0.0",
+  "description": "API proxy untuk download file JSON dengan sistem token",
+  "private": true,
+  "scripts": {
+    "dev": "vercel dev"
+  }
+}
